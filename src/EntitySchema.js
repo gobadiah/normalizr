@@ -1,3 +1,6 @@
+import IterableSchema from './IterableSchema';
+import { OneToOne, OneToMany } from './Relationships';
+
 export default class EntitySchema {
   constructor(key, options = {}) {
     if (!key || typeof key !== 'string') {
@@ -21,7 +24,13 @@ export default class EntitySchema {
   define(nestedSchema) {
     for (let key in nestedSchema) {
       if (nestedSchema.hasOwnProperty(key)) {
-        this[key] = nestedSchema[key];
+        if (nestedSchema[key] instanceof EntitySchema) {
+          this[key] = new OneToOne({ schema: nestedSchema[key] });
+        } else if (nestedSchema[key] instanceof IterableSchema) {
+          this[key] = new OneToMany({ iterable: nestedSchema[key], key });
+        } else {
+          this[key] = nestedSchema[key];
+        }
       }
     }
   }
