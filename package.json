@@ -1,37 +1,37 @@
 {
-  "name": "normalizr",
-  "version": "1.4.1",
+  "name": "redux-rails",
+  "version": "0.1.0",
   "description": "Normalizes JSON according to schema for Flux application",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gaearon/normalizr.git"
+    "url": "https://github.com/gobadiah/redux-rails"
   },
   "keywords": [
-    "flux",
+    "redux",
     "normalize",
     "api",
-    "json"
+    "json",
+    "rails"
   ],
   "files": [
     "dist",
     "lib",
     "src"
   ],
-  "author": "Dan Abramov",
+  "author": "Michaël Journo",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/gaearon/normalizr/issues"
+    "url": "https://github.com/gobadiah/redux-rails/issues"
   },
-  "homepage": "https://github.com/gaearon/normalizr",
+  "homepage": "https://github.com/gobadiah/redux-rails/",
   "scripts": {
     "test": "mocha --compilers js:babel/register --recursive",
     "test:watch": "npm run test -- --watch",
     "prebuild": "rimraf dist lib",
     "build": "webpack && babel src --out-dir lib",
-    "build:watch": "npm run build -- --watch",
+    "build:watch": "babel src --watch --out-dir lib",
     "prepublish": "npm run build",
-    "local": "babel src --watch --out-dir lib"
   },
   "devDependencies": {
     "babel": "^5.8.3",
