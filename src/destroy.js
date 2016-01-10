@@ -5,11 +5,7 @@ import isEqual from 'lodash/lang/isEqual';
 import mapValues from 'lodash/object/mapValues';
 import { OneToOne, OneToMany, ManyToOne } from './Relationships';
 
-export function destroy(key, id, schema, bags, result) {
-  if (result === undefined) {
-    result = { cascade: {}, to_update: [] };
-  }
-  let e = new Error('here');
+export function destroy(key, id, schema, bags, result = { cascade: {}, to_update: [] }) {
   if (!result.cascade.hasOwnProperty(key)) {
     result.cascade[key] = [];
   }

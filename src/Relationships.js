@@ -24,6 +24,10 @@ export class ManyToOne {
     this._reverse = reverse;
   }
 
+  getKey() {
+    return this._many.schema.getKey();
+  }
+
   getMany() {
     return this._many;
   }
