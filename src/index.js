@@ -3,6 +3,11 @@ import IterableSchema from './IterableSchema';
 import isObject from 'lodash/lang/isObject';
 import isEqual from 'lodash/lang/isEqual';
 import mapValues from 'lodash/object/mapValues';
+import { OneToOne, OneToMany, ManyToOne } from './Relationships';
+import { destroy } from './destroy';
+import { update }  from './update';
+import { denormalize } from './denormalize';
+import _ from 'lodash';
 
 function defaultAssignEntity(normalized, key, entity) {
   normalized[key] = entity;
@@ -46,7 +51,6 @@ function visitIterable(obj, iterableSchema, bag, options) {
   }
 }
 
-
 function defaultMergeIntoEntity(entityA, entityB, entityKey) {
   for (let key in entityB) {
     if (!entityB.hasOwnProperty(key)) {
@@ -82,8 +86,15 @@ function visitEntity(entity, entitySchema, bag, options) {
   let stored = bag[entityKey][id];
   let normalized = visitObject(entity, entitySchema, bag, options);
   mergeIntoEntity(stored, normalized, entityKey);
-
   return id;
+}
+
+function visitOneToOne(obj, relation, bag, options) {
+  return visitEntity(obj, relation.getSchema(), bag, options);
+}
+
+function visitOneToMany(obj, relation, bag, options) {
+  return visitIterable(obj, relation.getIterableSchema(), bag, options);
 }
 
 function visit(obj, schema, bag, options) {
@@ -95,9 +106,13 @@ function visit(obj, schema, bag, options) {
     return visitEntity(obj, schema, bag, options);
   } else if (schema instanceof IterableSchema) {
     return visitIterable(obj, schema, bag, options);
+  } else if (schema instanceof OneToOne) {
+    return visitOneToOne(obj, schema, bag, options);
+  } else if (schema instanceof OneToMany) {
+    return visitOneToMany(obj, schema, bag, options);
   } else {
     return visitObject(obj, schema, bag, options);
-  }
+  };
 }
 
 export function arrayOf(schema, options) {
@@ -109,6 +124,8 @@ export function valuesOf(schema, options) {
 }
 
 export { EntitySchema as Schema };
+
+export { OneToOne, OneToMany, ManyToOne, update, destroy, denormalize };
 
 export function normalize(obj, schema, options = {}) {
   if (!isObject(obj) && !Array.isArray(obj)) {
