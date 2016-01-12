@@ -26,6 +26,11 @@ export function denormalize(key, id, schema, bags, query = {}, n = 0) {
       let subkey      = relation.getKey();
       let field       = relation.getOne().field;
       let ids         = bags[key][id][field];
+      console.log(bags);
+      console.log(key);
+      console.log(id);
+      console.log(field);
+      console.log(typeof(ids));
       let ItemSchema  = relation.getIterableSchema().getItemSchema();
       delete result[field];
       let field_ids   = _.singularize(field) + '_ids';

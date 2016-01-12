@@ -7,6 +7,8 @@ import { OneToOne, OneToMany, ManyToOne } from './Relationships';
 import { destroy } from './destroy';
 import { update }  from './update';
 import { denormalize } from './denormalize';
+import middleware   from './middleware';
+import idCompare    from './idCompare';
 import _ from 'lodash';
 
 function defaultAssignEntity(normalized, key, entity) {
@@ -125,7 +127,10 @@ export function valuesOf(schema, options) {
 
 export { EntitySchema as Schema };
 
-export { OneToOne, OneToMany, ManyToOne, update, destroy, denormalize };
+export { OneToOne, OneToMany, ManyToOne, update, destroy, denormalize, middleware, idCompare };
+export { SYNC_ACTION, SYNCED_ACTION } from './constants';
+export { default as reducer } from './reducer';
+export { prefixes } from './constants';
 
 export function normalize(obj, schema, options = {}) {
   if (!isObject(obj) && !Array.isArray(obj)) {
