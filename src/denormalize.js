@@ -31,31 +31,28 @@ export function denormalize(key, id, schema, bags, query = {}, n = 0) {
       console.log(id);
       console.log(field);
       console.log(typeof(ids));
+      console.log(ids);
       let ItemSchema  = relation.getIterableSchema().getItemSchema();
       delete result[field];
       let field_ids   = _.singularize(field) + '_ids';
       let field_attr  = field + '_attributes';
-      if (true) {
-        ids.sort((a, b) => b - a);
-        for (let i of ids) {
-          if (i > 0) { // && !bags[subkey][i].hasOwnProperty('_destroy')) {
-            if (result[field_ids] == undefined) {
-              result[field_ids] = [];
-            }
-            console.log(prefix +i + ' > 0 , setting query ...');
-            result[field_ids].push(i);
-            denormalize(subkey, i, ItemSchema, bags, query, n + 1);
-            console.log(prefix +'done');
-            console.log(_.cloneDeep(query));
-          } else {
-            if (result[field_attr] == undefined) {
-              result[field_attr] = [];
-            }
-            result[field_attr].push(denormalize(subkey, i, ItemSchema, bags, query, n + 1));
+      ids.sort((a, b) => b - a);
+      for (let i of ids) {
+        if (i > 0) { // && !bags[subkey][i].hasOwnProperty('_destroy')) {
+          if (result[field_ids] == undefined) {
+            result[field_ids] = [];
           }
+          console.log(prefix +i + ' > 0 , setting query ...');
+          result[field_ids].push(i);
+          denormalize(subkey, i, ItemSchema, bags, query, n + 1);
+          console.log(prefix +'done');
+          console.log(_.cloneDeep(query));
+        } else {
+          if (result[field_attr] == undefined) {
+            result[field_attr] = [];
+          }
+          result[field_attr].push(denormalize(subkey, i, ItemSchema, bags, query, n + 1));
         }
-      } else {
-        result[field_attr] = _.map(ids, id => denormalize(subkey, id, ItemSchema, bags));
       }
     } else if (relation instanceof ManyToOne) {
       let foreign_key = relation.getMany().foreign_key;

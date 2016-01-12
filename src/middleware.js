@@ -8,7 +8,7 @@ const getNewId = collection => {
   return Math.min(...collection.keySeq().toArray(), 0) - 1;
 };
 
-import { normalize, arrayOf } from './index';
+import { normalize, arrayOf } from './normalize';
 import { destroy } from './destroy';
 
 import {
@@ -125,7 +125,9 @@ export default (schemas) => {
         }
         if (to_update.length == 0) {
           console.log('global update for ' + key);
+          console.log(store.getState().app.get('entities'));
           let bags = store.getState().app.get('entities').toJS();
+          console.log(bags);
           let result = {};
           for (let element of root) {
             denormalize(key, element.id, schemas[key], bags, result);
