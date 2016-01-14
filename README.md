@@ -1,4 +1,6 @@
-# redux-rails [![build status](https://img.shields.io/travis/gaearon/normalizr/master.svg?style=flat-square)](https://travis-ci.org/gaearon/normalizr) [![npm version](https://img.shields.io/npm/v/normalizr.svg?style=flat-square)](https://www.npmjs.com/package/normalizr) [![npm downloads](https://img.shields.io/npm/dm/normalizr.svg?style=flat-square)](https://www.npmjs.com/package/normalizr)
+This is a work in progress, and shouldn't be used anywhere ... Yet !
+
+# redux-rails [![build status](https://img.shields.io/travis/gobadiah/redux-rails/master.svg?style=flat-square)](https://travis-ci.org/gobadiah/redux-rails) [![npm version](https://img.shields.io/npm/v/normalizr.svg?style=flat-square)](https://www.npmjs.com/package/normalizr) [![npm downloads](https://img.shields.io/npm/dm/normalizr.svg?style=flat-square)](https://www.npmjs.com/package/normalizr)
 
 Redux-rails is a fork from [normalizr](https://rackt.github.io/redux). Its goal is to abstract some usual tasks when dealing with a rails api.
 It also allows you to build offline apps with sync option.
@@ -9,80 +11,18 @@ It also allows you to build offline apps with sync option.
 npm install --save redux-rails
 ```
 
-## Sample App
+## Why
 
-### Flux
+When scaffolding a model in rails, there are always the same classic actions created : index, show, create, update, destroy.
+Normalizr uses its own Schemas to transform the body of an api call, into a flatten structure, that can be included directly in the redux state.
+Redux-rails takes this concept two step further. 
 
-See **[flux-react-router-example](https://github.com/gaearon/flux-react-router-example)**.
+First we abstract the api call for the usual operation, create, destroy, update. In order to do that, we go the other way around, deepening a flatten state
+and use rails ability to update nested models.
 
-### Redux
+Second, we try to handle offline application. If the api calls don't work for lack of connection, the app becomes out of sync. You can dispatch a sync action anytime, 
+that will sync with the backend, if the connection comes back.
 
-See **[redux/examples/real-world](https://github.com/rackt/redux/tree/master/examples/real-world)**.
-
-## The Problem
-
-* You have a JSON API that returns deeply nested objects;  
-* You want to port your app to [Flux](https://github.com/facebook/flux) or [Redux](http://rackt.github.io/redux);
-* You noticed [it's hard](https://groups.google.com/forum/#!topic/reactjs/jbh50-GJxpg) for Stores (or Reducers) to consume data from nested API responses.  
-
-Normalizr takes JSON and a schema and **replaces nested entities with their IDs, gathering all entities in dictionaries**.
-
-For example,
-
-```javascript
-[{
-  id: 1,
-  title: 'Some Article',
-  author: {
-    id: 1,
-    name: 'Dan'
-  }
-}, {
-  id: 2,
-  title: 'Other Article',
-  author: {
-    id: 1,
-    name: 'Dan'
-  }
-}]
-```
-
-can be normalized to
-
-```javascript
-{
-  result: [1, 2],
-  entities: {
-    articles: {
-      1: {
-        id: 1,
-        title: 'Some Article',
-        author: 1
-      },
-      2: {
-        id: 2,
-        title: 'Other Article',
-        author: 1
-      }
-    },
-    users: {
-      1: {
-        id: 1,
-        name: 'Dan'
-      }
-    }
-  }
-}
-```
-
-Note the flat structure (all nesting is gone).
-
-## Features
-
-* Entities can be nested inside other entities, objects and arrays;
-* Combine entity schemas to express any kind of API response;
-* Entities with same IDs are automatically merged (with a warning if they differ);
-* Allows using a custom ID attribute (e.g. slug).
 
 ## Usage
 
