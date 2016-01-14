@@ -1,6 +1,6 @@
 This is a work in progress, and shouldn't be used anywhere ... Yet !
 
-# redux-rails [![build status](https://img.shields.io/travis/gobadiah/redux-rails/master.svg?style=flat-square)](https://travis-ci.org/gobadiah/redux-rails) [![npm version](https://img.shields.io/npm/v/normalizr.svg?style=flat-square)](https://www.npmjs.com/package/normalizr) [![npm downloads](https://img.shields.io/npm/dm/normalizr.svg?style=flat-square)](https://www.npmjs.com/package/normalizr)
+# redux-rails [![build status](https://img.shields.io/travis/gobadiah/redux-rails/master.svg?style=flat-square)](https://travis-ci.org/gobadiah/redux-rails) [![npm version](https://img.shields.io/npm/v/redux-rails.svg?style=flat-square)](https://www.npmjs.com/package/redux-rails) [![npm downloads](https://img.shields.io/npm/dm/redux-rails.svg?style=flat-square)](https://www.npmjs.com/package/redux-rails)
 
 Redux-rails is a fork from [normalizr](https://rackt.github.io/redux). Its goal is to abstract some usual tasks when dealing with a rails api.
 It also allows you to build offline apps with sync option.
