@@ -11,50 +11,6 @@ var should = require('chai').should(),
     valuesOf = normalizr.valuesOf;
 
 describe('normalizr', function () {
-  it('fails creating nameless schema', function () {
-    (function () {
-      new Schema();
-    }).should.throw();
-  });
-
-  it('fails creating entity with non-string name', function () {
-    (function () {
-      new Schema(42);
-    }).should.throw();
-  });
-
-  it('fails normalizing something other than array or object', function () {
-    (function () {
-      normalize(42, {});
-    }).should.throw();
-
-    (function () {
-      normalize(null, {});
-    }).should.throw();
-
-    (function () {
-      normalize(undefined, {});
-    }).should.throw();
-
-    (function () {
-      normalize('42', {});
-    }).should.throw();
-  });
-
-  it('fails normalizing without an object schema', function () {
-    (function () {
-      normalize({});
-    }).should.throw();
-
-    (function () {
-      normalize({}, '42');
-    }).should.throw();
-
-    (function () {
-      normalize({}, []);
-    }).should.throw();
-  });
-
   it('can normalize single entity', function () {
     var article = new Schema('articles'),
         input;
@@ -1282,68 +1238,6 @@ describe('normalizr', function () {
         }
       }
     });
-  });
-
-  it('warns about inconsistencies when merging entities', function () {
-    var writer = new Schema('writers'),
-        book = new Schema('books'),
-        schema = arrayOf(writer),
-        input;
-
-    writer.define({
-      books: arrayOf(book)
-    });
-
-    input = [{
-      id: 3,
-      name: 'Jo Rowling',
-      books: [{
-        id: 1,
-        soldWell: true,
-        name: 'Harry Potter'
-      }]
-    }, {
-      id: 3,
-      name: 'Jo Rowling',
-      books: [{
-        id: 1,
-        soldWell: false,
-        name: 'Harry Potter'
-      }]
-    }];
-
-    var warnCalled = false,
-        realConsoleWarn;
-
-    function mockWarn() {
-      warnCalled = true;
-    }
-
-    realConsoleWarn = console.warn;
-    console.warn = mockWarn;
-
-    normalize(input, schema).should.eql({
-      result: [3, 3],
-      entities: {
-        writers: {
-          3: {
-            id: 3,
-            name: 'Jo Rowling',
-            books: [1]
-          }
-        },
-        books: {
-          1: {
-            id: 1,
-            soldWell: true,
-            name: 'Harry Potter'
-          }
-        }
-      }
-    });
-
-    warnCalled.should.eq(true);
-    console.warn = realConsoleWarn;
   });
 
   it('ignores prototype objects and creates new object', function () {

@@ -1,6 +1,3 @@
-import isObject from 'lodash/lang/isObject';
-import IterableSchema from './IterableSchema';
-
 export class OneToOne {
   constructor(one, second, arg) {
     this._one = one;
@@ -15,21 +12,32 @@ export class OneToOne {
   getSchema() {
     return this._one.schema;
   }
-};
+}
 
 export class ManyToOne {
   constructor(many, one, reverse) {
     this._many = many;
     this._one  = one;
     this._reverse = reverse;
+    if (this._many && 'field' in this._many && !('foreign_key' in this._many)) {
+      this._many['foreign_key'] = this._many['field'] + '_id';
+    }
   }
 
   getKey() {
-    return this._many.schema.getKey();
+    return this._one.iterable.getItemSchema().getKey();
   }
 
   getMany() {
     return this._many;
+  }
+
+  getForeignKey() {
+    return this._many.foreign_key;
+  }
+
+  getField() {
+    return this._many.field;
   }
 
   getSchema() {
@@ -39,10 +47,10 @@ export class ManyToOne {
   reverse() {
     return this._reverse;
   }
-};
+}
 
 export class OneToMany {
-  constructor(one, many, options = {}) {
+  constructor(one, many) {
     this._one = one;
     this._many = many;
     this._reverse = new ManyToOne(many, one, this);
@@ -53,7 +61,11 @@ export class OneToMany {
   }
 
   getKey() {
-    return this._one.iterable.getItemSchema().getKey();
+    return this._many.schema.getKey();
+  }
+
+  getField() {
+    return this._one.field;
   }
 
   getIterableSchema() {
@@ -63,4 +75,4 @@ export class OneToMany {
   reverse() {
     return this._reverse;
   }
-};
+}

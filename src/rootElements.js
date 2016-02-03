@@ -1,3 +1,4 @@
+import _             from 'lodash';
 import { ManyToOne } from './Relationships';
 
 export default (elements, schema) => {

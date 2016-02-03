@@ -1,19 +1,17 @@
-import EntitySchema from './EntitySchema';
-import IterableSchema from './IterableSchema';
-import isObject from 'lodash/lang/isObject';
-import isEqual from 'lodash/lang/isEqual';
-import mapValues from 'lodash/object/mapValues';
-import { OneToOne, OneToMany, ManyToOne } from './Relationships';
-import { destroy } from './destroy';
-import { update }  from './update';
+import { OneToMany, ManyToOne } from './Relationships';
+import rootElements from './rootElements';
 import _ from 'lodash';
 _.mixin(require('lodash-inflection'));
 
-export function denormalize(key, id, schema, bags, query = {}, n = 0) {
+export function _denormalize(key, id, schema, bags, query = {}, n = 0) {
   let result = _.clone(bags[key][id]);
-  let prefix = _.padRight('>', n * 4);
-  console.log(prefix +'denormalize ' + key + ' ' + id);
-  if (result.id < 0) {
+  if (!query.hasOwnProperty(key)) {
+    query[key] = [];
+  }
+  if (!result.hasOwnProperty('id')) {
+    throw new Error('id property is missing');
+  }
+  if (result.hasOwnProperty('id') && result.id < 0) {
     delete result.id;
   }
   delete result._id;
@@ -23,46 +21,56 @@ export function denormalize(key, id, schema, bags, query = {}, n = 0) {
     }
     let relation = schema[prop];
     if (relation instanceof OneToMany) {
-      let subkey      = relation.getKey();
+      let subkey      = relation.reverse().getKey();
       let field       = relation.getOne().field;
+      if (!bags[key][id].hasOwnProperty(field)) {
+        continue;
+      }
       let ids         = bags[key][id][field];
-      console.log(bags);
-      console.log(key);
-      console.log(id);
-      console.log(field);
-      console.log(typeof(ids));
-      console.log(ids);
       let ItemSchema  = relation.getIterableSchema().getItemSchema();
       delete result[field];
       let field_ids   = _.singularize(field) + '_ids';
       let field_attr  = field + '_attributes';
       ids.sort((a, b) => b - a);
       for (let i of ids) {
-        if (i > 0) { // && !bags[subkey][i].hasOwnProperty('_destroy')) {
+        if (i > 0) {
           if (result[field_ids] == undefined) {
             result[field_ids] = [];
           }
-          console.log(prefix +i + ' > 0 , setting query ...');
           result[field_ids].push(i);
-          denormalize(subkey, i, ItemSchema, bags, query, n + 1);
-          console.log(prefix +'done');
-          console.log(_.cloneDeep(query));
+          _denormalize(subkey, i, ItemSchema, bags, query, n + 1);
         } else {
           if (result[field_attr] == undefined) {
             result[field_attr] = [];
           }
-          result[field_attr].push(denormalize(subkey, i, ItemSchema, bags, query, n + 1));
+          result[field_attr].push(_denormalize(subkey, i, ItemSchema, bags, query, n + 1));
         }
       }
     } else if (relation instanceof ManyToOne) {
       let foreign_key = relation.getMany().foreign_key;
-      if (result[foreign_key] < 0) {
+      if (result.hasOwnProperty(foreign_key) && result[foreign_key] < 0) {
         delete result[foreign_key];
       }
     }
   }
-  if (id > 0) { // && (!result.hasOwnProperty('_destroy') || n == 0)) {
-    query[id] = result;
+  if (parseInt(id) > 0 || n == 0) {
+    query[key].push(result);
   }
   return result;
 }
+
+export function denormalize(bags, schemas) {
+  let result = {};
+  for (let key in bags) {
+    if (!bags.hasOwnProperty(key)) {
+      continue;
+    }
+    let schema = schemas[key];
+    let root   = rootElements(bags[key], schema);
+    for (let element of root) {
+      _denormalize(key, element.id, schema, bags, result);
+    }
+  }
+  return result;
+}
+

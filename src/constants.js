@@ -10,7 +10,6 @@ for (let action of actions) {
   prefixes['SUCCESS_' + action + '_PREFIX'] = PREFIX + 'SUCCESS_' + action;
   prefixes['FAILURE_' + action + '_PREFIX'] = PREFIX + 'FAILURE_' + action;
 }
-
 export const SYNC_ACTION   = PREFIX + 'SYNC';
 export const SYNCED_ACTION = PREFIX + 'SYNCED';
 

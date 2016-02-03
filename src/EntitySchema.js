@@ -1,3 +1,4 @@
+import { arrayOf } from './normalize';
 import IterableSchema from './IterableSchema';
 import { OneToOne, OneToMany } from './Relationships';
 
@@ -33,5 +34,14 @@ export default class EntitySchema {
         }
       }
     }
+  }
+
+  hasMany(schema, field, inverseOf) {
+    this[field] = new OneToMany({ iterable: arrayOf(schema), field },
+                              { schema: this, field: inverseOf });
+    schema.define({
+      [inverseOf]: this[field].reverse()
+    });
+    return this;
   }
 }

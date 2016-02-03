@@ -1,4 +1,4 @@
-export const idCompare = (a, b) => {
+export default (a, b) => {
   if (a._id && b._id) {
     return b._id - a._id;
   } else if (a._id) {

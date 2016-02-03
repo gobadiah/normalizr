@@ -1,11 +1,11 @@
 import _ from 'lodash';
 _.mixin(require('lodash-inflection'));
-import { fromJS } from 'immutable';
 
 import { denormalize } from './denormalize';
 
 const getNewId = collection => {
-  return Math.min(...collection.keySeq().toArray(), 0) - 1;
+  let newId = Math.min(...collection.keySeq().toArray(), 0) - 1;
+  return newId;
 };
 
 import { normalize, arrayOf } from './normalize';
@@ -50,8 +50,6 @@ export default (schemas) => {
         }
       }))
       .catch((ex) => {
-        console.log('failure');
-        console.log(ex);
         store.dispatch({
           type: actionType(prefixes.FAILURE_CREATE_PREFIX, action.meta.key),
           payload: ex,
@@ -71,12 +69,10 @@ export default (schemas) => {
           },
           body: JSON.stringify({ [action.meta.key]: action.payload.cascade[action.meta.key] })
         })
-        .then(res => {
-          console.log(res);
+        .then(() => {
           store.dispatch(Object.assign({}, action, { type: actionType(prefixes.SUCCESS_DESTROY_PREFIX, action.meta.key) }));
         })
         .catch(ex => {
-          console.log(ex);
           store.dispatch({
             type: actionType(prefixes.FAILURE_DESTROY_PREFIX, action.meta.key),
             payload: ex,
@@ -91,8 +87,6 @@ export default (schemas) => {
         }
         let elements = store.getState().app.getIn(['entities', key]).toJS();
         let root = rootElements(_.values(elements), schemas[key]);
-        if (root.length == 0) {
-        }
         let to_update = [];
         let to_update_ids = [];
         for (let el of root) {
@@ -115,7 +109,7 @@ export default (schemas) => {
                   meta: {
                     count: action.meta ? action.meta.count || 1 : 1,
                     pass: state => {
-                      return !state.app.getIn(['entities', key]).find(element => to_update_ids.includes(element.get('id')));
+                      return !state.app.getIn(['entities', key]).find(element => to_update_ids.indexOf(element.get('id')) >= 0);
                     }
                   }
                 }
@@ -124,10 +118,7 @@ export default (schemas) => {
           }
         }
         if (to_update.length == 0) {
-          console.log('global update for ' + key);
-          console.log(store.getState().app.get('entities'));
           let bags = store.getState().app.get('entities').toJS();
-          console.log(bags);
           let result = {};
           for (let element of root) {
             denormalize(key, element.id, schemas[key], bags, result);
@@ -150,9 +141,6 @@ export default (schemas) => {
               type: SYNCED_ACTION,
               payload: normalized
             });
-          })
-          .catch(ex  => {
-            console.log(ex);
           });
           return;
         }
@@ -160,7 +148,6 @@ export default (schemas) => {
     }
     let result = next(action);
     if (action && action.meta && action.meta.post_hook && action.meta.post_hook.meta.count < 5 && (!action.meta.post_hook.meta.pass || action.meta.post_hook.meta.pass(store.getState()))) {
-      console.log('Post hook');
       store.dispatch(Object.assign({}, action.meta.post_hook, { meta: { count: action.meta.post_hook.meta.count } }));
     }
     return result;

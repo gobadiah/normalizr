@@ -3,8 +3,7 @@ import IterableSchema from './IterableSchema';
 import isObject from 'lodash/lang/isObject';
 import isEqual from 'lodash/lang/isEqual';
 import mapValues from 'lodash/object/mapValues';
-import { OneToOne, OneToMany, ManyToOne } from './Relationships';
-import _ from 'lodash';
+import { OneToOne, OneToMany } from './Relationships';
 
 function defaultAssignEntity(normalized, key, entity) {
   normalized[key] = entity;
@@ -48,7 +47,7 @@ function visitIterable(obj, iterableSchema, bag, options) {
   }
 }
 
-function defaultMergeIntoEntity(entityA, entityB, entityKey) {
+function defaultMergeIntoEntity(entityA, entityB) {
   for (let key in entityB) {
     if (!entityB.hasOwnProperty(key)) {
       continue;
@@ -59,10 +58,6 @@ function defaultMergeIntoEntity(entityA, entityB, entityKey) {
       continue;
     }
 
-    console.warn(
-      'When merging two ' + entityKey + ', found unequal data in their "' + key + '" values. Using the earlier value.',
-      entityA[key], entityB[key]
-    );
   }
 }
 
@@ -109,7 +104,7 @@ function visit(obj, schema, bag, options) {
     return visitOneToMany(obj, schema, bag, options);
   } else {
     return visitObject(obj, schema, bag, options);
-  };
+  }
 }
 
 export function normalize(obj, schema, options = {}) {

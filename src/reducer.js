@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { OneToMany, ManyToOne } from './Relationships';
 import { update } from './update';
 
-import { prefixes, SYNC_ACTION, SYNCED_ACTION } from './constants';
+import { prefixes, SYNCED_ACTION } from './constants';
 
 export default schemas => {
   const regex = _.mapValues(prefixes, (value) => new RegExp(value));
@@ -48,14 +48,14 @@ export default schemas => {
           ignore.push(field);
         }
       }
-      state     = state.updateIn(['entities', action.meta.key, action.meta.old_id], map => map.mergeWith((prev, next, key) => ignore.includes(key) ? prev : next, fromJS(action.payload)));
+      state     = state.updateIn(['entities', action.meta.key, action.meta.old_id], map => map.mergeWith((prev, next, key) => ignore.indexOf(key) >= 0 ? prev : next, fromJS(action.payload)));
       if (newId != oldId) {
         let result  = update(action.meta.key, action.meta.old_id, schemas[action.meta.key], bags);
         for (let path of result.in_list) {
           state = state.updateIn(['entities', ...path], list => list.map(val => (val == oldId) ? newId : val));
         }
         for (let path of result.in_value) {
-          state = state.updateIn(['entities', ...path], val => newId);
+          state = state.updateIn(['entities', ...path], () => newId);
         }
         state   = state.updateIn(['entities', action.meta.key], map => map.set(newId, map.get(oldId)).delete(oldId));
       }
@@ -69,7 +69,7 @@ export default schemas => {
       return state;
     } else if (regex.SUCCESS_DESTROY_PREFIX.test(action.type)) {
       for (let key in action.payload.cascade) {
-        state = state.updateIn(['entities', key], map => map.filter((v, k) => !action.payload.cascade[key].includes(k)));
+        state = state.updateIn(['entities', key], map => map.filter((v, k) => action.payload.cascade[key].indexOf(k) == -1));
       }
       for (let modif of action.payload.to_update) {
         if (state.hasIn(['entities', ...modif.path])) {
@@ -79,7 +79,7 @@ export default schemas => {
       return state;
     } else if (action.type == SYNCED_ACTION) {
       for (let key in action.payload.entities) {
-        state = state.updateIn(['entities', key],   map => Map());
+        state = state.updateIn(['entities', key],   () => Map());
         for (let id in action.payload.entities[key]) {
           state = state.updateIn(['entities', key], map => map.set(parseInt(id), fromJS(action.payload.entities[key][id])));
         }
