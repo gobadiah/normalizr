@@ -26,17 +26,19 @@ export default schemas => {
           let id    = action.payload[foreign_key];
           let field = schema[key].reverse().getOne().field;
           let path  = schema[key].reverse().getKey();
-          if (!id || !state.hasIn(['entities', path, id])) {
+          if (!id) {
             continue;
+          } else if (!state.hasIn(['entities', path, id])) {
+            return state;
           }
           state = state.updateIn(['entities', path, id], map => map.update(field, list => list.push(action.meta.id)));
         }
       }
       return state.updateIn(['entities', action.meta.key], map => map.set(action.meta.id, fromJS(Object.assign(action.payload, { _id: action.meta.id, id: action.meta.id }))));
     } else if (regex.SUCCESS_CREATE_PREFIX.test(action.type)) {
-      let bags      = state.get('entities').toJS();
-      let newId = action.payload.id;
-      let oldId = action.meta.old_id;
+      let bags   = state.get('entities').toJS();
+      let newId  = action.payload.id;
+      let oldId  = action.meta.old_id;
       let schema = schemas[action.meta.key];
       let ignore = [];
       for (let key in schema) {

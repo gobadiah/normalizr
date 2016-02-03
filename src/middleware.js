@@ -19,15 +19,13 @@ import {
 } from './constants';
 import rootElements from './rootElements';
 
-export default (schemas) => {
+export default (schemas, toEntities = (store) => store.getState().app.get('entities')) => {
   const regex = _.mapValues(prefixes, (value) => new RegExp(value));
   return store => next => action => {
     if (regex.CREATE_PREFIX.test(action.type)) {
-      let newId = getNewId(store.getState().app.get('entities').get(action.meta.key));
+      let newId = getNewId(toEntities(store).get(action.meta.key));
       action.meta.id = newId;
-      if (global.INTERNET) {
-        store.dispatch(Object.assign({}, action, { type: actionType(prefixes.REQUEST_CREATE_PREFIX, action.meta.key) }));
-      }
+      store.dispatch(Object.assign({}, action, { type: actionType(prefixes.REQUEST_CREATE_PREFIX, action.meta.key) }));
     } else if (regex.REQUEST_CREATE_PREFIX.test(action.type)) {
       const post_hook = _.cloneDeep(action.meta.post_hook);
       delete action.payload._id;
@@ -39,7 +37,7 @@ export default (schemas) => {
         body: JSON.stringify({ [_.singularize(action.meta.key)]: action.payload }),
         credentials: 'same-origin'
       })
-      .then((res) =>  res.json())
+      .then((res) => res.json())
       .then((json) => store.dispatch({
         type: actionType(prefixes.SUCCESS_CREATE_PREFIX, action.meta.key),
         payload: json,
@@ -59,33 +57,33 @@ export default (schemas) => {
       delete action.meta.post_hook;
     } else if (regex.DESTROY_PREFIX.test(action.type)) {
       let id = action.payload;
-      action.payload = destroy(action.meta.key, id, schemas[action.meta.key], store.getState().app.get('entities').toJS());
-      if (global.INTERNET) {
-        fetch('/api/' + action.meta.key + '/', {
-          method: 'DELETE',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ [action.meta.key]: action.payload.cascade[action.meta.key] })
-        })
-        .then(() => {
-          store.dispatch(Object.assign({}, action, { type: actionType(prefixes.SUCCESS_DESTROY_PREFIX, action.meta.key) }));
-        })
-        .catch(ex => {
-          store.dispatch({
-            type: actionType(prefixes.FAILURE_DESTROY_PREFIX, action.meta.key),
-            payload: ex,
-            error: true
-          });
+      action.payload = destroy(action.meta.key, id, schemas[action.meta.key], toEntities(store).toJS());
+      fetch('/api/' + action.meta.key + '/', {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ [action.meta.key]: action.payload.cascade[action.meta.key] })
+      })
+      .then(() => {
+        store.dispatch(Object.assign({}, action, { type: actionType(prefixes.SUCCESS_DESTROY_PREFIX, action.meta.key) }));
+      })
+      .catch(ex => {
+        store.dispatch({
+          type: actionType(prefixes.FAILURE_DESTROY_PREFIX, action.meta.key),
+          payload: ex,
+          error: true
         });
-      }
+      });
     } else if (action.type === SYNC_ACTION) {
+      let bags = toEntities(store).toJS();
+      let denormalized = denormalize(bags, schemas);
       for (let key in schemas) {
         if (!schemas.hasOwnProperty(key)) {
           continue;
         }
-        let elements = store.getState().app.getIn(['entities', key]).toJS();
+        let elements = toEntities(store).get(key).toJS();
         let root = rootElements(_.values(elements), schemas[key]);
         let to_update = [];
         let to_update_ids = [];
@@ -109,7 +107,7 @@ export default (schemas) => {
                   meta: {
                     count: action.meta ? action.meta.count || 1 : 1,
                     pass: state => {
-                      return !state.app.getIn(['entities', key]).find(element => to_update_ids.indexOf(element.get('id')) >= 0);
+                      return !toEntities(store).get(key).find(element => to_update_ids.indexOf(element.get('id')) >= 0);
                     }
                   }
                 }
@@ -118,17 +116,12 @@ export default (schemas) => {
           }
         }
         if (to_update.length == 0) {
-          let bags = store.getState().app.get('entities').toJS();
-          let result = {};
-          for (let element of root) {
-            denormalize(key, element.id, schemas[key], bags, result);
-          }
           fetch('/api/' + key + '/sync/', {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ [key]: result }),
+            body: JSON.stringify({ [key]: denormalized[key] }),
             credentials: 'same-origin'
           })
           .then(res  => res.json())

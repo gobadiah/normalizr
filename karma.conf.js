@@ -9,6 +9,7 @@ module.exports = function(config) {
     browserDisconnectTimeout: 480000,
 
     browsers: ['Chrome', 'Firefox', 'Safari', 'PhantomJS'],
+    //browsers: ['Chrome'],
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
@@ -16,11 +17,12 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha'],
+    frameworks: ['mocha', 'sinon'],
 
 
     // list of files / patterns to load in the browser
     files: [
+      './node_modules/whatwg-fetch/fetch.js',
       'tests.webpack.js'
     ],
 
