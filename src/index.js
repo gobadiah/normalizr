@@ -12,7 +12,6 @@ import rootElements     from './rootElements';
 export { EntitySchema as Schema };
 
 export { OneToMany, ManyToOne, update, destroy, denormalize, middleware, idCompare, rootElements };
-// export { SYNC_ACTION, SYNCED_ACTION } from './constants';
+export { default as actionsCreator } from './actions';
 export { default as reducer } from './reducer';
-// export { prefixes } from './constants';
 export { normalize, arrayOf, valuesOf } from './normalize';
