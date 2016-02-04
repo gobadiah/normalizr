@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import EntitySchema     from './EntitySchema';
 import { OneToMany, ManyToOne }
                         from './Relationships';
