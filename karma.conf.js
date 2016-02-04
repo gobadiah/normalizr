@@ -22,7 +22,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'node_modules/babel-polyfill/dist/polyfill.js',
+      './node_modules/babel-polyfill/dist/polyfill.js',
       './node_modules/whatwg-fetch/fetch.js',
       'tests.webpack.js'
     ],
@@ -48,15 +48,6 @@ module.exports = function(config) {
     coverageReporter: {
       type: 'html',
       dir: 'coverage/'
-    },
-
-    mochaReporter: {
-      colors: {
-        success: 'blue',
-        info: 'bgGreen',
-        warning: 'cyan',
-        error: 'red'
-      }
     },
 
     // web server port

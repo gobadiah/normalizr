@@ -8,9 +8,9 @@ module.exports = {
         ]
     },
     output: {
-        filename: 'dist/normalizr.min.js',
+        filename: 'dist/redux-rails.min.js',
         libraryTarget: 'umd',
-        library: 'normalizr'
+        library: 'redux-rails'
     },
     plugins: [
         new webpack.optimize.OccurenceOrderPlugin(),

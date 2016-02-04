@@ -70,11 +70,13 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha'],
+    frameworks: ['mocha', 'sinon'],
 
 
     // list of files / patterns to load in the browser
     files: [
+      './node_modules/babel-polyfill/dist/polyfill.js',
+      './node_modules/whatwg-fetch/fetch.js',
       'tests.webpack.js'
     ],
 
@@ -87,14 +89,14 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'tests.webpack.js': ['webpack', 'sourcemap']
+      'tests.webpack.js': ['eslint', 'webpack', 'sourcemap']
     },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress', 'dots', 'saucelabs', 'mocha'],
+    reporters: ['mocha', 'coverage'],
 
 
     // web server port
@@ -126,6 +128,11 @@ module.exports = function(config) {
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity,
+
+    eslint: {
+      stopOnError: true,
+      stopOnWarning: false
+    },
 
     webpack: {
         devtool: 'inline-source-map',
