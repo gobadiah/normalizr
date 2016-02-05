@@ -169,4 +169,41 @@ describe('middleware', function () {
 
     middleware(store)(next)(action);
   });
+
+  it('should dispatch a failure to create on 401', function () {
+    fetchMock.mock('/api/users/', 'POST', {
+      status: 401,
+      statusText: 'Unauthorized'
+    });
+    var action     = createUser({ name: 'Arthur' });
+    action.type    = actionType(prefixes['REQUEST_CREATE_PREFIX'], 'users');
+    action.meta.id = -5;
+    var expected_dispatch = {
+      type: actionType(prefixes.FAILURE_CREATE_PREFIX, action.meta.key),
+      payload: {
+        error: 'Unauthorized',
+        code: 401
+      },
+      error: true,
+      meta: {
+        key: action.meta.key,
+        old_id: -5,
+        post_hook: undefined
+      }
+    };
+
+    var store = {
+      state,
+      dispatch: function (action) {
+        expect(fetchMock.called()).to.be.true;
+        expect(spy.calledOnce).to.be.true;
+        done();
+      }
+    }
+    var spy = sinon.spy(store, 'dispatch');
+
+    var next = sinon.spy();
+
+    middleware(store)(next)(action);
+  });
 });

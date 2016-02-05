@@ -19,6 +19,15 @@ import {
 } from './constants';
 import rootElements from './rootElements';
 
+function HttpError(message, payload) {
+  this.name = 'HttpError';
+  this.message = message;
+  this.payload = payload;
+}
+
+HttpError.prototype = Object.create(Error.prototype);
+HttpError.prototype.constructor = HttpError;
+
 export default (schemas, toEntities = (store) => store.getState().app.get('entities')) => {
   const regex = _.mapValues(prefixes, (value) => new RegExp(value));
   return store => next => action => {
@@ -37,8 +46,15 @@ export default (schemas, toEntities = (store) => store.getState().app.get('entit
         body: JSON.stringify({ [_.singularize(action.meta.key)]: action.payload }),
         credentials: 'same-origin'
       })
-      .then((res) => res.json())
-      .then((json) => store.dispatch({
+      .then((res) => {
+        if (!res.ok) {
+          throw new HttpError(res.statusText, {
+            code: res.status,
+            error: res.statusText
+          });
+        }
+        return res.json();
+      }).then((json) => store.dispatch({
         type: actionType(prefixes.SUCCESS_CREATE_PREFIX, action.meta.key),
         payload: json,
         meta: {
@@ -48,10 +64,19 @@ export default (schemas, toEntities = (store) => store.getState().app.get('entit
         }
       }))
       .catch((ex) => {
+        let payload = ex;
+        if (payload in ex) {
+          payload = ex.payload;
+        }
         store.dispatch({
           type: actionType(prefixes.FAILURE_CREATE_PREFIX, action.meta.key),
-          payload: ex,
-          error: true
+          payload,
+          error: true,
+          meta: {
+            key: action.meta.key,
+            old_id: action.meta.old_id,
+            post_hook: undefined
+          }
         })
       });
       delete action.meta.post_hook;
