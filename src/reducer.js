@@ -3,7 +3,6 @@ import { Map, fromJS } from 'immutable';
 import _ from 'lodash';
 
 import { OneToMany, ManyToOne } from './Relationships';
-import { update } from './update';
 
 import { prefixes, SYNCED_ACTION } from './constants';
 
@@ -14,6 +13,11 @@ export default schemas => {
     initialState = initialState.set(key, Map());
   }
   return (state = initialState, action) => {
+    for (let key in schemas) {
+      if (!state.has(key)) {
+        state = state.set(key, Map());
+      }
+    }
     if (regex.CREATE_PREFIX.test(action.type)) {
       let schema = schemas[action.meta.key];
       for (let key in schema) {
@@ -86,6 +90,12 @@ export default schemas => {
         }
       }
       return state;
+    } else if (regex.UPDATE_PREFIX.test(action.type)) {
+      let id = action.payload.id;
+      if (!id) {
+        return state;
+      }
+      return state.updateIn([action.meta.key, id], map => map.merge(fromJS(action.payload)));
     } else if (action.type == SYNCED_ACTION) {
       for (let key in action.payload.entities) {
         state = state.updateIn([key],   () => Map());

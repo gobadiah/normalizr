@@ -2,7 +2,7 @@ import _ from 'lodash';
 _.mixin(require('lodash-inflection'));
 
 const PREFIX    = '@APP/REDUX_RAILS/';
-const actions   = ['CREATE', 'DESTROY'];
+const actions   = ['CREATE', 'UPDATE', 'DESTROY'];
 const prefixes  = {};
 for (let action of actions) {
   prefixes[action + '_PREFIX'] = PREFIX + action;

@@ -28,16 +28,21 @@ function HttpError(message, payload) {
 HttpError.prototype = Object.create(Error.prototype);
 HttpError.prototype.constructor = HttpError;
 
-export default (schemas, toEntities = (store) => store.getState().app.get('entities')) => {
+export default (schemas, toEntities = (store) => store.getState().app.get('entities'), api = false) => {
   const regex = _.mapValues(prefixes, (value) => new RegExp(value));
   return store => next => action => {
     if (regex.CREATE_PREFIX.test(action.type)) {
       let newId = getNewId(toEntities(store).get(action.meta.key));
       action.meta.id = newId;
-      store.dispatch(Object.assign({}, action, { type: actionType(prefixes.REQUEST_CREATE_PREFIX, action.meta.key) }));
+      if (api) {
+        store.dispatch(Object.assign({}, action, { type: actionType(prefixes.REQUEST_CREATE_PREFIX, action.meta.key) }));
+      }
     } else if (regex.REQUEST_CREATE_PREFIX.test(action.type)) {
       const post_hook = _.cloneDeep(action.meta.post_hook);
       delete action.payload._id;
+      if (action.payload.id && action.payload.id < 0) {
+        delete action.payload.id;
+      }
       fetch('/api/' + action.meta.key, {
         method: 'POST',
         headers: {
@@ -80,7 +85,7 @@ export default (schemas, toEntities = (store) => store.getState().app.get('entit
         })
       });
       delete action.meta.post_hook;
-    } else if (regex.DESTROY_PREFIX.test(action.type)) {
+    } else if (regex.DESTROY_PREFIX.test(action.type) && api) {
       let id = action.payload;
       action.payload = destroy(action.meta.key, id, schemas[action.meta.key], toEntities(store).toJS());
       fetch('/api/' + action.meta.key + '/', {
@@ -131,7 +136,7 @@ export default (schemas, toEntities = (store) => store.getState().app.get('entit
                   type: SYNC_ACTION,
                   meta: {
                     count: action.meta ? action.meta.count || 1 : 1,
-                    pass: state => {
+                    pass: () => {
                       return !toEntities(store).get(key).find(element => to_update_ids.indexOf(element.get('id')) >= 0);
                     }
                   }

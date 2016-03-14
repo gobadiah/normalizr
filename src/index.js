@@ -1,4 +1,4 @@
-import EntitySchema     from './EntitySchema';
+export { default as Schema } from './EntitySchema';
 import { OneToMany, ManyToOne }
                         from './Relationships';
 import { destroy }      from './destroy';
@@ -7,8 +7,6 @@ import { denormalize }  from './denormalize';
 import middleware       from './middleware';
 import idCompare        from './idCompare';
 import rootElements     from './rootElements';
-
-export { EntitySchema as Schema };
 
 export { OneToMany, ManyToOne, update, destroy, denormalize, middleware, idCompare, rootElements };
 export { SYNC_ACTION, SYNCED_ACTION, actionType, prefixes } from './constants';
