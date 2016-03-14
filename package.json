@@ -17,7 +17,9 @@
   "files": [
     "dist",
     "lib",
-    "src"
+    "src",
+    ".babelrc",
+    "webpack.config.js"
   ],
   "author": "Michaël Journo",
   "license": "MIT",
