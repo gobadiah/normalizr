@@ -29,7 +29,7 @@
     "test": "karma start karma.conf-ci.js",
     "test:watch": "npm run test -- --watch",
     "prebuild": "rimraf dist lib",
-    "build": "webpack && babel src --out-dir lib",
+    "build": "webpack --config webpack.config.js && babel src --out-dir lib",
     "build:watch": "babel src --watch --out-dir lib",
     "prepublish": "npm run build",
     "postinstall": "npm run build"
