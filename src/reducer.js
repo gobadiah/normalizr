@@ -2,6 +2,8 @@ import { Map, fromJS } from 'immutable';
 
 import _ from 'lodash';
 
+import update from './update';
+
 import { OneToMany, ManyToOne } from './Relationships';
 
 import { prefixes, SYNCED_ACTION } from './constants';
