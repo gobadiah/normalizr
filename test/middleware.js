@@ -24,7 +24,7 @@ describe('middleware', function () {
   var destroyUser = actions.users.destroy;
   var createCar = actions.cars.create;
   var destroyCar = actions.cars.destroy;
-  var middleware = createMiddleware(schemas, (store) => store.state);
+  var middleware = createMiddleware(schemas, (store) => store.state, true);
   var state  = immutable.fromJS({
     users: {},
     cars: {}
