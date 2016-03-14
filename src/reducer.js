@@ -2,7 +2,7 @@ import { Map, fromJS } from 'immutable';
 
 import _ from 'lodash';
 
-import update from './update';
+import { update }       from './update';
 
 import { OneToMany, ManyToOne } from './Relationships';
 
